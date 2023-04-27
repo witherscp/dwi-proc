@@ -2,18 +2,18 @@
 
 #===================================================================================================================
 
-# Name: 		DTI_do_setupBiowulf.sh
+# Name: 		DWI_do_setupBiowulf.sh
 
 # Author:   	Katie Snyder
 # Date:     	05/01/19
 
-# Syntax:       ./DTI_do_setupBiowulf.sh
+# Syntax:       ./DWI_do_setupBiowulf.sh
 # Arguments:    --
-# Description:  Sets up biowulf account for user so that it can run biowulf DTI scripts.
+# Description:  Sets up biowulf account for user so that it can run biowulf DWI scripts.
 # Requirements: 1) Biowulf account
 # Notes:		- This script requires you to enter your biowulf password mutliple times
 # 				- One may also choose to set up SSH public key authentication for biowulf. This is required in order
-# 				  to run biowulf push/pull scripts (such as DTI_do_TORTOISE_biowulf_{push,pull}.sh)
+# 				  to run biowulf push/pull scripts (such as DWI_do_03_{push,pull}.sh)
 # 					- Save the key files at the default filepath (~/.ssh/id_rsa)
 # 					- Choose a passphrase that is long but easy to remember
 # 					- DO NOT USE YOUR NIH PASSWORD AS YOUR PASSPHRASE
@@ -45,8 +45,8 @@ fi
 
 #--------------------------------------
 
-echo -e "\033[0;35m++ Linking data directories and creating DTI directories... ++\033[0m"
-ssh -XY ${username}@biowulf.nih.gov "mkdir -p /data/${username}/DTI; mkdir -p /data/${username}/Scripts/__completeJobs; exit"
+echo -e "\033[0;35m++ Linking data directories and creating DWI directories... ++\033[0m"
+ssh -XY ${username}@biowulf.nih.gov "mkdir -p /data/${username}/DWI; mkdir -p /data/${username}/Scripts/__completeJobs; exit"
 
 #--------------------------------------
 

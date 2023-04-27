@@ -72,7 +72,7 @@ scripts_dir=$pwd/scripts
 username=${USER}
 
 # biowulf login node paths
-biowulf_dti_dir="/data/${username}/DTI"
+biowulf_dwi_dir="/data/${username}/DWI"
 
 #--------------------------------------------------------------------------------------------------------------------
 
@@ -91,23 +91,23 @@ ssh-add
 
 #====================================================================================================================
 
-all_wdir=($(ssh -q ${username}@biowulf.nih.gov "ls ${biowulf_dti_dir} | xargs printf '%s\n' | grep __WORK_TORTOISE"))
+all_wdir=($(ssh -q ${username}@biowulf.nih.gov "ls ${biowulf_dwi_dir} | xargs printf '%s\n' | grep __WORK_TORTOISE"))
 
 if [[ ${#all_wdir[@]} -eq 0 ]]; then
-	echo -e "\033[0;36m++ No working directories found in biowulf. Please run DTI_do_03_push.sh. Exiting... ++\033[0m"
+	echo -e "\033[0;36m++ No working directories found in biowulf. Please run DWI_do_03_push.sh. Exiting... ++\033[0m"
 	exit 1
 fi
 
 for wdir_name in "${all_wdir[@]}"; do
 
-	ls_postop=$(ssh -q ${USER}@biowulf.nih.gov "ls ${biowulf_dti_dir}/${wdir_name} 2>&1")
+	ls_postop=$(ssh -q ${USER}@biowulf.nih.gov "ls ${biowulf_dwi_dir}/${wdir_name} 2>&1")
 
 	# find if preop or postop
 	if echo ${ls_postop} | grep -q "postop"; then
-		biowulf_wdir="${biowulf_dti_dir}/${wdir_name}/postop"
+		biowulf_wdir="${biowulf_dwi_dir}/${wdir_name}/postop"
 		folder_suffix='_postop'
 	else
-		biowulf_wdir="${biowulf_dti_dir}/${wdir_name}/preop"
+		biowulf_wdir="${biowulf_dwi_dir}/${wdir_name}/preop"
 		folder_suffix=''
 	fi
 
@@ -132,7 +132,7 @@ for wdir_name in "${all_wdir[@]}"; do
 
 		# ********************** DEFINE PATHS **********************
 
-		subj_dwi_dir=$neu_dir/Projects/DTI/$subj
+		subj_dwi_dir=$neu_dir/Projects/DWI/$subj
 		dwi_drbuddi_dir=${subj_dwi_dir}/drbuddi${folder_suffix}
 
 		# ********************** COPY FILES FROM BIOWULF TO SHARES **********************
@@ -177,7 +177,7 @@ for wdir_name in "${all_wdir[@]}"; do
 
 	# clean up biowulf
 	echo -e "\033[0;35m++ Removing ${wdir_name} from biowulf ++\033[0m"
-	ssh ${username}@biowulf.nih.gov "rm -r /data/${username}/DTI/${wdir_name}"
+	ssh ${username}@biowulf.nih.gov "rm -r /data/${username}/DWI/${wdir_name}"
 
 	# remove temporary directory
 	rm -r ${temp_stdout_dir}

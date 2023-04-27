@@ -84,7 +84,7 @@ job_name="TORTOISE_${run_date}"
 TORTOISE_version="TORTOISE/3.1.4"
 
 # biowulf login node paths
-biowulf_dti_dir="/data/${username}/DTI"
+biowulf_dwi_dir="/data/${username}/DWI"
 
 #---------------------------------------------------------------------------------------------------------------------
 
@@ -115,11 +115,11 @@ fi
 echo -e "\033[0;35m++ Adding authentication keys to ssh-agent ... ++\033[0m"
 ssh-add
 
-# DATA CHECK: check that /data/${username}/DTI and /home/${username}/DIFF_PREP_WORK/registration_settings.dmc exist in biowulf
-check_dti_folder=$(ssh ${username}@biowulf.nih.gov "ls /data/${username}/DTI 2>&1")
+# DATA CHECK: check that /data/${username}/DWI and /home/${username}/DIFF_PREP_WORK/registration_settings.dmc exist in biowulf
+check_dwi_folder=$(ssh ${username}@biowulf.nih.gov "ls /data/${username}/DWI 2>&1")
 check_diff_prep_work=$(ssh ${username}@biowulf.nih.gov "ls /home/${username}/DIFF_PREP_WORK/registration_settings.dmc 2>&1")
-if echo "${check_dti_folder} ${check_diff_prep_work}" | grep -q "No such file or directory"; then
-	echo -e "\033[0;36m++ Biowulf is not set up for user ${username}. Please run DTI_do_setupBiowulf.sh. Exiting... ++\033[0m"
+if echo "${check_dwi_folder} ${check_diff_prep_work}" | grep -q "No such file or directory"; then
+	echo -e "\033[0;36m++ Biowulf is not set up for user ${username}. Please run DWI_do_setupBiowulf.sh. Exiting... ++\033[0m"
 	exit 1
 fi
 
@@ -128,14 +128,14 @@ fi
 # ***** STEP 1: set up biowulf working directory "__WORK_TORTOISE_??" *****
 
 # check the number of working directories in biowulf login node and name new wdir
-num_wdir=$(printf -- '%s\n' "${check_dti_folder}" | grep -c "__WORK_TORTOISE")
+num_wdir=$(printf -- '%s\n' "${check_dwi_folder}" | grep -c "__WORK_TORTOISE")
 wdir_name=__WORK_TORTOISE_$(printf "%02d" ${num_wdir})
 
 # biowulf working directory
 if [[ $postop == true ]]; then
-	biowulf_wdir="${biowulf_dti_dir}/${wdir_name}/postop"
+	biowulf_wdir="${biowulf_dwi_dir}/${wdir_name}/postop"
 else
-	biowulf_wdir="${biowulf_dti_dir}/${wdir_name}/preop"
+	biowulf_wdir="${biowulf_dwi_dir}/${wdir_name}/preop"
 fi
 
 # set up temporary working directory in local machine
@@ -154,7 +154,7 @@ for subj in "${subj_arr[@]}"; do
 
 	# *********************** DEFINE PATHS ***********************
 
-    subj_dwi_dir=$neu_dir/Projects/DTI/$subj
+    subj_dwi_dir=$neu_dir/Projects/DWI/$subj
     dwi_reg_dir=$subj_dwi_dir/reg${folder_suffix}
     dwi_sel_dir=$subj_dwi_dir/sel${folder_suffix}
 
@@ -178,7 +178,7 @@ for subj in "${subj_arr[@]}"; do
 
 	echo -e "\033[0;35m++ Checking data requirements for subject ${subj} ++\033[0m"
 
-	# check that a DTI folder is present for the current subj
+	# check that a DWI folder is present for the current subj
 	if [ ! -d "${subj_dwi_dir}" ]; then
 		echo -e "\033[0;36m++ Subject ${subj} does not have ${subj_dwi_dir}. Skipping subject ${subj} ++\033[0m"
 		subj_skip+=("${subj}")
@@ -225,7 +225,7 @@ done
 
 if [[ ${#subj_actually_proc[@]} -eq 0 ]]; then
 	echo -e "\033[0;35m++ No subjects passed data check. Removing ${wdir_name} ++\033[0m"
-	ssh ${username}@biowulf.nih.gov "rm -r ${biowulf_dti_dir}/${wdir_name}"
+	ssh ${username}@biowulf.nih.gov "rm -r ${biowulf_dwi_dir}/${wdir_name}"
 
 	# delete temporary directory
 	rm -r ${temp_dir}

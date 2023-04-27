@@ -58,7 +58,7 @@ else
 	reg_suffix=''
 fi
 
-dwi_dir=$neu_dir/Projects/DTI/$subj
+dwi_dir=$neu_dir/Projects/DWI/$subj
 dwi_reg_dir=$dwi_dir/reg${reg_suffix}
 dwi_proc_dir=$(pwd)
 scripts_dir=${dwi_proc_dir}/scripts
@@ -75,7 +75,7 @@ source ${neu_dir}/Scripts_and_Parameters/scripts/all_req_check -afni -x11
 
 # check that registered T2 exists in reg dir
 if [[ ! -f ${dwi_reg_dir}/t2.nii ]]; then
-	echo -e "\033[0;36m++ Subject ${subj} does not have registered T2 in DTI reg dir. Please run DTI_do_01.sh. Exiting... ++\033[0m"
+	echo -e "\033[0;36m++ Subject ${subj} does not have registered T2 in DWI reg dir. Please run DWI_do_01.sh. Exiting... ++\033[0m"
 	exit 1
 fi
 
@@ -114,4 +114,4 @@ fi
 
 #====================================================================================================================
 
-echo -e "\033[0;32m++ Awesome possum! Please move further on the processing pipeline for ${subj} (DTI_do_02.sh) ++\033[0m"
+echo -e "\033[0;32m++ Awesome possum! Please move further on the processing pipeline for ${subj} (DWI_do_02.sh) ++\033[0m"

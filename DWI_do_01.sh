@@ -71,7 +71,7 @@ bids_research_dir=$bids_subj_dir/ses-research${ses_suffix}
 bids_research_anat_dir=$bids_research_dir/anat
 bids_dwi_dir=$bids_research_dir/dwi
 
-dwi_dir=$neu_dir/Projects/DTI/$subj
+dwi_dir=$neu_dir/Projects/DWI/$subj
 dwi_reg_dir=$dwi_dir/reg${reg_suffix}
 
 # make reg dir
