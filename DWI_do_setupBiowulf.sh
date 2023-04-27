@@ -6,7 +6,6 @@
 
 # Author:   	Katie Snyder
 # Date:     	05/01/19
-# Updated:      07/15/20
 
 # Syntax:       ./DTI_do_setupBiowulf.sh
 # Arguments:    --
@@ -20,25 +19,14 @@
 # 					- DO NOT USE YOUR NIH PASSWORD AS YOUR PASSPHRASE
 # 					- For more information, refer to the following biowulf webpage: https://hpc.nih.gov/docs/sshkeys.html
 
-# Change log:
-# 	- BYY 07/15/20: added SSH public key authentication setup
-
 #===================================================================================================================
 
 # VARIABLES
 
-unameOut="$(uname -s)"
-case "${unameOut}" in
-    Linux*)     neu_dir="/shares/NEU";;
-    Darwin*)    neu_dir="/Volumes/Shares/NEU";;
-    *)          echo -e "\033[0;35m++ Unrecognized OS. Must be either Linux or Mac OS in order to run script. \
-						 Exiting... ++\033[0m"; exit 1
-esac
-
 username=$( basename $HOME )
 
-top_biowulf_scripts=${neu_dir}/Scripts_and_Parameters/biowulf
-biowulf_scripts=${top_biowulf_scripts}/DTI_files
+dwi_proc_dir=$(pwd)
+files_dir=${dwi_proc_dir}/files
 
 #====================================================================================================================
 # BEGIN SCRIPT
@@ -51,20 +39,19 @@ read -r ynresponse
 ynresponse=$(echo "$ynresponse" | tr '[:upper:]' '[:lower:]')
 if [ "$ynresponse" == "y" ]; then
 	echo -e "\033[0;35m++ Copying profile files... ++\033[0m"
-	scp ${top_biowulf_scripts}/biowulf_bash_profile ${username}@biowulf2.nih.gov:/home/${username}/.bash_profile
-	scp ${top_biowulf_scripts}/biowulf_bashrc ${username}@biowulf2.nih.gov:/home/${username}/.bashrc
+	scp ${files_dir}/biowulf_bash_profile ${username}@biowulf.nih.gov:/home/${username}/.bash_profile
+	scp ${files_dir}/biowulf_bashrc ${username}@biowulf.nih.gov:/home/${username}/.bashrc
 fi
 
 #--------------------------------------
 
 echo -e "\033[0;35m++ Linking data directories and creating DTI directories... ++\033[0m"
-ssh -XY ${username}@biowulf2.nih.gov "mkdir -p /data/${username}/DTI; mkdir -p /data/${username}/Scripts/__completeJobs; exit"
+ssh -XY ${username}@biowulf.nih.gov "mkdir -p /data/${username}/DTI; mkdir -p /data/${username}/Scripts/__completeJobs; exit"
 
 #--------------------------------------
 
 echo -e "\033[0;35m++ Copying scripts and files to biowulf... ++\033[0m"
-scp ${biowulf_scripts}/TORTOISE_biowulf.sh ${biowulf_scripts}/TORTOISE_biowulf_swarm.sh ${biowulf_scripts}/TORTOISE.swarm ${username}@biowulf2.nih.gov:/data/$username/Scripts/.
-scp -r ${biowulf_scripts}/DIFF_PREP_WORK ${username}@biowulf2.nih.gov:/home/${username}/.
+scp -r ${files_dir}/DIFF_PREP_WORK ${username}@biowulf.nih.gov:/home/${username}/.
 
 #====================================================================================================================
 

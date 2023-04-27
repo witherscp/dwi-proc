@@ -1,0 +1,208 @@
+<!-- DTI initialization file -->
+<!-- do not remove the above comment line -->
+
+<!--***********************************************************************-->
+<!-- CORRECTION MODE                                                       -->
+<!--                                                                       -->
+<!-- Specifies which undesirable effects will be corrected. Predefined     -->
+<!-- motion & eddy distortion correction optimization settings (each       -->
+<!-- setting points to a file in the software settings folder:             -->
+<!--   off        :No DWI registration.                                    -->
+<!--   rigid      :Corrects only motion.                                   -->
+<!--   quadratic  :Eddy currents are modeled with quadratic functions.     -->
+<!--               Quadratic                                               -->
+<!--               model is sufficient 99% of the time.                    -->
+<!--   cubic      :Eddy currents are modeled with cubic functions.         -->
+<!--   multistart :Eddy currents are modeled with quadratic functions.     -->
+<!--               The rigid search space is VERY LARGE. This can be used  -->
+<!--               to register sagittal images to axial for example.       -->
+<!-- You can also create a custom settings file in ~/DIFF_PREP_WORK and    -->
+<!-- put its name here.                                                    -->
+<correction_mode>quadratic</correction_mode>
+
+
+<!--***********************************************************************-->
+<!-- EPI CORRECTION                                                        -->
+<!--                                                                       -->
+<!-- Predefined EPI distortion correction optimization settings. Each      -->
+<!-- setting points to a file in the software settings folder.             -->
+<!--                                                                       -->
+<!--   off       :Do not perform EPI distortion correction.                -->
+<!--   ITKBSP    :Perform BSplines transformation based correction with    -->
+<!--              ITK. Similar to previous version of DIFFPREP.            -->
+<!--   ITKBSPv4  :Perform BSplines transformation based correction with    -->
+<!--              itkv4. Multiresolution. More powerful than ITKBSP but    -->
+<!--              more sensitive.                                          -->
+<!--   ANTSSyN   :Perform SyN transformation based correction with ANTs.   -->
+<!--              Most powerful but most sensitive too.                    -->
+<!-- The parameters for each method is described in their corresponding    -->
+<!-- files.                                                                -->
+<EPI_optimization_settings>ANTSSyN</EPI_optimization_settings>
+
+
+<!--***********************************************************************-->
+<!-- REFERENCE VOL INDEX                                                   -->
+<!--                                                                       -->
+<!-- Among possibly many b=0 s/mm2 images, the index of the b=0 image      --> 
+<!-- (within only b=0 images) to be used as template. Starting index is    -->
+<!-- zero, so that b0_id=2 will select the 3rd b=0 image. Defaults to the  -->
+<!-- first b=0 image with id of 0.                                         -->
+<b0_id>0</b0_id>
+                
+                
+<!--***********************************************************************-->
+<!-- GIBBS RINGING CORRECTION                                              -->
+<!--                                                                       -->
+<!-- For the original unprocessed DWIs. See Kellner, Dhital, Kiselev and   -->
+<!-- Resiert, MRM 2016, 76:1574-1581.                                      -->
+<!--   off       :Do not perform Gibbs ringing correction.                 -->
+<!--   on        :Perform Gibbs ringing correction.                        -->
+<gibbs_ringing_correction>on</gibbs_ringing_correction>
+
+
+<!--***********************************************************************-->
+<!-- DENOISING                                                             -->
+<!--                                                                       -->
+<!-- Methods for DWI images denoising based on J. Veraart, E. Fieremans,   -->
+<!-- and D.S. Novikov, `Diffusion MRI noise mapping using random matrix    -->
+<!-- theory' Magn Res. Med., early view (2016), doi: 10.1002/mrm.26059.    -->
+<!--   off       :Still performs the denoising but only uses the output    -->
+<!--              noise image for noise computations.                      -->
+<!--   for_reg   :Uses the denoised DWIs for registration but outputs as   -->
+<!--              the final images the corrected original images.          -->
+<!--   for_final :Uses the denoised DWIs for both registration and as the  -->
+<!--              final corrected images.                                  -->
+<denoising>for_reg</denoising> 
+
+
+<!--***********************************************************************-->
+<!-- HUMANITY                                                              -->
+<!--                                                                       -->
+<!-- Is it a human brain? Specialized processing is performed if the       -->
+<!-- brain is human.                                                       -->
+<!--   0         :No, not human brain.                                     -->
+<!--   1         :Yes, human brain.                                        -->
+<is_human_brain>1</is_human_brain>
+                               
+                               
+<!--***********************************************************************-->
+<!-- UPSAMPLING GEOMETRY                                                   -->
+<!--                                                                       -->
+<!-- Options.                                                              -->
+<!--   off       :No upsampling.                                           -->
+<!--   all       :Upsampling in all directions.                            -->
+<!--   slice     :Upsampling in slice direction only.                      -->
+<!-- If value entered does not match any of the above, it defaults to      -->
+<!-- "all".                                                                -->
+<upsampling>off</upsampling>
+                            
+                            
+<!--***********************************************************************-->
+<!-- UPSAMPLING AMOUNT                                                     -->
+<!--                                                                       -->
+<!-- Upsampling factor.  By what factor each dimensions's resolution will  -->
+<!-- be reduced (improved) by.                                             -->
+<upsampling_factor>2.0000000</upsampling_factor>                           
+                                                                          
+
+<!--***********************************************************************-->
+<!-- INTERPOLATION METHOD                                                  -->
+<!--                                                                       -->
+<!-- Determines the algorithm to use for upsampling.                       -->
+<!--                                                                       -->
+<!-- Will take effect only if <upsampling> is all or slice_only            -->
+<!--   NN        :3D Nearest neighbor                                      -->
+<!--   Linear    :Trilinear                                                -->
+<!--   BSPCubic  :B-splines cubic.                                         -->
+<!--   Sync      :Hamming sync                                             -->
+<upsampling_method>BSPCubic</upsampling_method> 
+                                                
+                                                
+<!--***********************************************************************-->
+<!-- HIGH B-VALUE REGISTRATION                                             -->
+<!--                                                                       -->
+<!-- High b-value registration for HARDI data. Only use this option if     --> 
+<!-- your data have very high b-values which result in low SNR, as this    -->
+<!-- option is slow.                                                       -->
+<!-- Options for 'perform_high_bval_correction':                           -->
+<!--   0         :Standard correction (i.e., no extra correction; default).-->
+<!--   1         :Enable high b-value correction.                          -->
+<!--                                                                       -->
+<!-- If "1", then all volumes with bval <= 'high_b_dti_end_bval' will be   -->
+<!-- corrected with standard processing. For vols with                     -->
+<!-- 'high_b_dti_end_bval' < bval <= 'high_b_mapmri_start_bval',           -->
+<!-- a noise- and distortion-free synthetic image will be synthesized from -->
+<!-- the tensor model and will be used as the target.                      -->
+<!-- For volumes with bval > 'high_b_mapmri_start_bval', a noise- and      -->
+<!-- distortion-free synthetic image will be synthesized from the MAPMRI   -->
+<!-- model and will be used as the target.                                 -->
+<perform_high_bval_correction>0</perform_high_bval_correction>
+<high_b_dti_end_bval>1000</high_b_dti_end_bval>
+<high_b_mapmri_start_bval>3000</high_b_mapmri_start_bval>
+
+                         
+                          
+<!--***********************************************************************-->
+<!-- FOV                                                                   -->
+<!--                                                                       -->
+<!-- Desired working FOV. Applied to template image during cropping (value -->
+<!-- in mm). Only for internal processing. Does not affect the output.     -->
+<FoVx>200.00000</FOVx>
+<FoVy>240.00000</FOVy>
+<FoVz>190.00000</FOVz>
+
+         
+<!--***********************************************************************-->
+<!--Place the image center of mass to center pixel in the working FoV?     -->
+<center_of_mass>1</center_of_mass>
+                     
+                                  
+<!--***********************************************************************-->
+<!-- OUTPUT INTERMEDIATE, I                                                -->
+<!--                                                                       -->
+<!-- Write intermediate motion & eddy corrected data (the transformation   -->
+<!-- file is written regardless). This should be written just for          -->
+<!-- troubleshoothing purposes.                                            -->
+<!--   0         :No, don't write intermediate files out.                  -->
+<!--   1         :Yes, write intermediate files out.                       -->
+<write_rpd>0</write_rpd>
+
+
+<!--***********************************************************************-->
+<!-- OUTPUT INTERMEDIATE, II                                               -->
+<!--                                                                       -->
+<!-- Write intermediate motion & eddy & EPI distortion corrected data (the -->
+<!-- transformation file is written regardless). This should be written    -->
+<!-- just for troubleshoothing purposes.                                   -->
+<!--   0         :No, don't write intermediate files out.                  -->
+<!--   1         :Yes, write intermediate files out.                       -->
+<write_rpd_epi>0</write_rpd_epi>
+                                
+                                
+<!--***********************************************************************-->
+<!-- OUTPUT INTERMEDIATE, III                                              -->
+<!--                                                                       -->
+<!-- Keep intermediate files?:                                             --> 
+<!--   0         :No, don't keep the intermediate files.                   -->
+<!--   1         :Yes, keep the intermediate files.                        -->
+<keep_intermediate_files>0</keep_intermediate_files>
+
+
+<!--***********************************************************************-->
+<!-- OUTPUT RESOLUTION                                                     -->
+<!--                                                                       -->
+<!-- Final diffusion weighted and structural image output resolution       -->
+<!-- (value in mm).                                                        -->
+<res_x>1.5</res_x>
+<res_y>1.5</res_y>
+<res_z>1.5</res_z>
+                 
+                 
+                 
+                 
+                 
+                 
+                 
+                 
+                 
+                 
