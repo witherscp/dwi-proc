@@ -43,7 +43,7 @@ fi
 
 # run drbuddi
 DR_BUDDI_withoutGUI	\
-	--up_data 	 "${diffprep_dir}"/up_proc.list 		\
-	--down_data  "${diffprep_dir}"/down_proc.list 	\
+	--up_data 	 "${diffprep_dir}"/dwi_up_filtered_proc.list 	\
+	--down_data  "${diffprep_dir}"/dwi_down_filtered_proc.list 	\
 	--structural "${diffprep_dir}"/t2.nii 			\
 	--output 	 "${buddi_dir}"/buddi.list
