@@ -46,9 +46,8 @@ fi
 
 unameOut="$(uname -s)"
 case "${unameOut}" in
-    Linux*)     neu_dir="/shares/NEU";;
     Darwin*)    neu_dir="/Volumes/Shares/NEU";;
-    *)          echo -e "\033[0;35m++ Unrecognized OS. Must be either Linux or Mac OS in order to run script. \
+    *)          echo -e "\033[0;35m++ Unrecognized OS. Must be Mac OS in order to run script. \
 						 Exiting... ++\033[0m"; exit 1
 esac
 
@@ -94,21 +93,21 @@ read -r ynresponse
 ynresponse=$(echo "$ynresponse" | tr '[:upper:]' '[:lower:]')
 
 if [ "$ynresponse" != "y" ]; then
-	echo -e "\033[0;35m++ Registration not correct. Run second registration? Enter y to run second registration; anything else if not ++\033[0m"
-	read -r ynresponse2
-	ynresponse2=$(echo "$ynresponse2" | tr '[:upper:]' '[:lower:]')
-
-	if [ "$ynresponse2" == "y" ]; then
-		if [ -f "${dwi_reg_dir}/fixReg.sh" ]; then
-			echo -e "\033[0;35m++ Second registration script already ran. Please manually correct registration (see proc notes). Exiting... ++\033[0m"
-		else
-			echo -e "\033[0;35m++ Running second registration script and exiting... ++\033[0m"
-			(cd "${dwi_reg_dir}" || exit; cp "${scripts_dir}"/fixReg_01.sh "${dwi_reg_dir}"/fixReg.sh; bash fixReg.sh)
-		fi
-		exit 1
+	if [ -f "${dwi_reg_dir}/fixReg.sh" ]; then
+		echo -e "\033[0;35m++ Second registration script already ran. Please manually correct registration (see proc notes). Exiting... ++\033[0m"
 	else
-		echo -e "\033[0;35m++ Second registration cancelled. Exiting... ++\033[0m"
-		exit 1
+		echo -e "\033[0;35m++ Registration not correct. Run second registration? Enter y to run second registration; anything else if not ++\033[0m"
+		read -r ynresponse2
+		ynresponse2=$(echo "$ynresponse2" | tr '[:upper:]' '[:lower:]')
+
+		if [ "$ynresponse2" == "y" ]; then
+			echo -e "\033[0;35m++ Running second registration script and exiting. Run ./DWI_do_01_QC.sh again when finished. ++\033[0m"
+			(cd "${dwi_reg_dir}" || exit; cp "${scripts_dir}"/fixReg_01.sh "${dwi_reg_dir}"/fixReg.sh; bash fixReg.sh)
+			exit 1
+		else
+			echo -e "\033[0;35m++ Second registration cancelled. Exiting... ++\033[0m"
+			exit 1
+		fi
 	fi
 fi
 
