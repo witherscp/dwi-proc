@@ -83,7 +83,7 @@ biowulf_dwi_dir="/data/${USER}/DWI"
 
 # REQUIREMENT CHECK
 
-source ${neu_dir}/Scripts_and_Parameters/scripts/all_req_check -ssh
+source "${scripts_dir}"/all_req_check.sh -ssh
 
 #====================================================================================================================
 # BEGIN SCRIPT
