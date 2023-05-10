@@ -1,0 +1,38 @@
+#!/bin/bash
+# TRACKING OPTIONS FILE
+
+# ----- INSTRUCTIONS -----
+# - list the ROI networks that you want to use in tractography in the array "my_roi"
+# 	- can list file names (recommended), absolute paths, or a mixture of both
+# 	- if file names are given, the default parent directory will be the "roi" subdirectory of the subject's DTI folder
+# 	- NOTE: if using DTI_do_track_biowulf_push.sh (batch processing in NIH biowulf), file names are REQUIRED
+# - specify 3dTrackID parameters in the my_* variables; for more information, see documentation of function by typing
+# 	"3dTrackId -help" in the command line
+# - one may include a note that is written to track_log in the "note" variable
+# 	- this note is written to ALL ROI that are tracked in a single call of the script; e.g. if three ROI files are
+# 	  specified in "my_roi", then all three track outputs will contain the note in their respective track_log rows
+# 	- no newlines are allowed in "note"
+
+# ----- ROI NETWORK FILES -----
+
+my_roi=( \
+	indt_std.141.both.Schaefer2018_400Parcels_17Networks_FINAL.nii.gz \
+	indt_std.141.both.Schaefer2018_600Parcels_17Networks_FINAL.nii.gz
+)
+
+# ----- 3dTrackID PARAMETERS -----
+
+# *** ALL MODES ***
+my_Thresh_FA=0.2
+my_Thresh_ANG=60
+my_Thresh_Len=20
+
+# *** PROB MODE ONLY ***
+my_Thresh_Frac=0.05
+my_Nmonte=1000
+
+# *** DET MODE ONLY ***
+my_bundle_thr=1
+
+# *** CUSTOM NOTES FOR TRACK_LOG ***
+note=""
