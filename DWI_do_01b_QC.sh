@@ -2,15 +2,8 @@
 
 #====================================================================================================================
 
-# Name: 		DWI_do_01_QC.sh
-
 # Author:   	Price Withers
 # Date:     	04/26/23
-
-# Syntax:       ./DWI_01_QC.sh [-h|--help] [-p|--postop] SUBJ
-
-# Arguments:    SUBJ: subject ID
-# Description:  QC check of T1-T2 registration
 
 #====================================================================================================================
 
@@ -52,13 +45,13 @@ case "${unameOut}" in
 esac
 
 if [[ $postop == 'true' ]]; then
-	reg_suffix='_postop'
+	folder_prefix='postop_'
 else
-	reg_suffix=''
+	folder_prefix=''
 fi
 
-dwi_dir=$neu_dir/Projects/DWI/$subj
-dwi_reg_dir=$dwi_dir/reg${reg_suffix}
+subj_dwi_dir=$neu_dir/Projects/DWI/$subj
+reg_dir=$subj_dwi_dir/${folder_prefix}reg
 dwi_proc_dir=$(pwd)
 scripts_dir=${dwi_proc_dir}/scripts
 
@@ -66,14 +59,14 @@ scripts_dir=${dwi_proc_dir}/scripts
 
 # REQUIREMENT CHECK
 
-source ${neu_dir}/Scripts_and_Parameters/scripts/all_req_check -afni -x11
+source "${scripts_dir}"/all_req_check.sh -afni -x11
 
 #--------------------------------------------------------------------------------------------------------------------
 
 # DATA CHECK
 
 # check that registered T2 exists in reg dir
-if [[ ! -f ${dwi_reg_dir}/t2.nii ]]; then
+if [[ ! -f ${reg_dir}/t2.nii ]]; then
 	echo -e "\033[0;36m++ Subject ${subj} does not have registered T2 in DWI reg dir. Please run DWI_do_01.sh. Exiting... ++\033[0m"
 	exit 1
 fi
@@ -83,7 +76,7 @@ fi
 #====================================================================================================================
 
 # STEP 1: perform quality check
-cd "$dwi_reg_dir" || exit
+cd "$reg_dir" || exit
 afni \
 	-com 'SWITCH_UNDERLAY t1.nii'	\
 	-com 'SWITCH_OVERLAY t2.nii'
@@ -93,7 +86,7 @@ read -r ynresponse
 ynresponse=$(echo "$ynresponse" | tr '[:upper:]' '[:lower:]')
 
 if [ "$ynresponse" != "y" ]; then
-	if [ -f "${dwi_reg_dir}/fixReg.sh" ]; then
+	if [ -f "${reg_dir}/fixReg.sh" ]; then
 		echo -e "\033[0;35m++ Second registration script already ran. Please manually correct registration (see proc notes). Exiting... ++\033[0m"
 	else
 		echo -e "\033[0;35m++ Registration not correct. Run second registration? Enter y to run second registration; anything else if not ++\033[0m"
@@ -102,7 +95,7 @@ if [ "$ynresponse" != "y" ]; then
 
 		if [ "$ynresponse2" == "y" ]; then
 			echo -e "\033[0;35m++ Running second registration script and exiting. Run ./DWI_do_01_QC.sh again when finished. ++\033[0m"
-			(cd "${dwi_reg_dir}" || exit; cp "${scripts_dir}"/fixReg_01.sh "${dwi_reg_dir}"/fixReg.sh; bash fixReg.sh)
+			(cd "${reg_dir}" || exit; cp "${scripts_dir}"/fixReg_01.sh "${reg_dir}"/fixReg.sh; bash fixReg.sh)
 			exit 1
 		else
 			echo -e "\033[0;35m++ Second registration cancelled. Exiting... ++\033[0m"

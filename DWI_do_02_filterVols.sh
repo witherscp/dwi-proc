@@ -2,15 +2,8 @@
 
 #====================================================================================================================
 
-# Name: 		DWI_do_02.sh
-
 # Author:   	Price Withers, Kayla Togneri
 # Date:     	04/27/23
-
-# Syntax:       ./DWI_do_02.sh [-h|--help] [-p|--postop] SUBJ
-
-# Arguments:    SUBJ: subject ID
-# Description:  
 
 #====================================================================================================================
 
@@ -52,34 +45,37 @@ case "${unameOut}" in
 esac
 
 if [[ $postop == 'true' ]]; then
-	folder_suffix='_postop'
+	folder_prefix='postop_'
 	ses_suffix='postop'
 else
-	folder_suffix=''
+	folder_prefix=''
 	ses_suffix=''
 fi
 
-dwi_dir=$neu_dir/Projects/DWI/$subj
-dwi_reg_dir=$dwi_dir/reg${folder_suffix}
-dwi_sel_dir=$dwi_dir/sel${folder_suffix}
+subj_dwi_dir=$neu_dir/Projects/DWI/$subj
+reg_dir=$subj_dwi_dir/${folder_prefix}reg
+sel_dir=$subj_dwi_dir/${folder_prefix}sel
 
 bids_root=$neu_dir/'Data'
 bids_subj_dir=$bids_root/sub-${subj}
 bids_research_dir=$bids_subj_dir/ses-research${ses_suffix}
 bids_dwi_dir=$bids_research_dir/dwi
 
-#--------------------------------------------------------------------------------------------------------------------
+dwi_proc_dir=$(pwd)
+scripts_dir=${dwi_proc_dir}/scripts
+
+#---------------------------------------------------------------------------------------------------------------------
 
 # REQUIREMENT CHECK
 
-source ${neu_dir}/Scripts_and_Parameters/scripts/all_req_check -afni -x11
+source "${scripts_dir}"/all_req_check.sh -afni -x11
 
 #--------------------------------------------------------------------------------------------------------------------
 
 # DATA CHECK
 
 # check that registered T2 exists in reg dir
-if [[ ! -f ${dwi_reg_dir}/t2.nii ]]; then
+if [[ ! -f ${reg_dir}/t2.nii ]]; then
 	echo -e "\033[0;36m++ Subject ${subj} does not have registered T2 in DWI reg dir. Please run DWI_do_01.sh. Exiting... ++\033[0m"
 	exit 1
 fi
@@ -98,8 +94,8 @@ fi
 #====================================================================================================================
 
 # make sel_dir
-if [[ ! -d $dwi_sel_dir ]]; then
-	mkdir "$dwi_sel_dir"
+if [[ ! -d $sel_dir ]]; then
+	mkdir "$sel_dir"
 fi
 
 # iterate through phase directions
@@ -108,33 +104,33 @@ for dir in down up; do
 	dwi_file=sub-${subj}_ses-research${ses_suffix}_acq-${acq}_dir-${dir}_dwi.nii.gz
 
 	# make 4D images for QC
-	if [[ ! -f "${dwi_sel_dir}"/qc_images/dwi_${dir}_qc_sepscl.sag.png ]]; then
+	if [[ ! -f "${sel_dir}"/qc_images/dwi_${dir}_qc_sepscl.sag.png ]]; then
 		@djunct_4d_imager \
 			-inset "${bids_dwi_dir}"/"$dwi_file" \
-			-prefix "${dwi_sel_dir}"/qc_images/dwi_${dir}
+			-prefix "${sel_dir}"/qc_images/dwi_${dir}
 	fi
 
 	# select out bad slices
-	if [[ ! -f "${dwi_sel_dir}"/dwi_goods.txt ]]; then
+	if [[ ! -f "${sel_dir}"/dwi_goods.txt ]]; then
 		if [[ $dir == 'down' ]]; then
 			fat_proc_select_vols \
 				-in_dwi "${bids_dwi_dir}"/"$dwi_file" \
-				-in_img "${dwi_sel_dir}"/qc_images/dwi_${dir}_qc_sepscl.sag.png \
-				-prefix "${dwi_sel_dir}"/dwi_${dir}	\
+				-in_img "${sel_dir}"/qc_images/dwi_${dir}_qc_sepscl.sag.png \
+				-prefix "${sel_dir}"/dwi_${dir}	\
 				-no_cmd_out
 
-			rm -f "${dwi_sel_dir}"/dwi_${dir}_goods.txt
-			rm -rf "${dwi_sel_dir}"/QC
+			rm -f "${sel_dir}"/dwi_${dir}_goods.txt
+			rm -rf "${sel_dir}"/QC
 		else
 			fat_proc_select_vols \
 				-in_dwi "${bids_dwi_dir}"/"$dwi_file" \
-				-in_img "${dwi_sel_dir}"/qc_images/dwi_${dir}_qc_sepscl.sag.png \
-				-in_bads "${dwi_sel_dir}"/dwi_down_bads.txt	\
-				-prefix "${dwi_sel_dir}"/dwi	\
+				-in_img "${sel_dir}"/qc_images/dwi_${dir}_qc_sepscl.sag.png \
+				-in_bads "${sel_dir}"/dwi_down_bads.txt	\
+				-prefix "${sel_dir}"/dwi	\
 				-no_cmd_out
 
-			rm -f "${dwi_sel_dir}"/dwi_down_bads.txt
-			rm -rf "${dwi_sel_dir}"/QC
+			rm -f "${sel_dir}"/dwi_down_bads.txt
+			rm -rf "${sel_dir}"/QC
 		fi
 	fi
 
@@ -147,8 +143,8 @@ for dir in down up; do
 
 	fat_proc_filter_dwis \
 		-in_dwi "${bids_dwi_dir}"/"$dwi_file"	\
-		-select_file "${dwi_sel_dir}"/dwi_goods.txt	\
-		-prefix "${dwi_sel_dir}"/dwi_${dir}_filtered	\
+		-select_file "${sel_dir}"/dwi_goods.txt	\
+		-prefix "${sel_dir}"/dwi_${dir}_filtered	\
 		-in_bvals ${bids_root}/acq-${acq}_dwi.bval	\
 		-in_row_vec ${bids_root}/acq-${acq}_dwi.bvec	\
 		-unit_mag_out	\

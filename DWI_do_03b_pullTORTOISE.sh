@@ -2,15 +2,8 @@
 
 #====================================================================================================================
 
-# Name: 		DWI_do_03_pull.sh
-
 # Author:   	Price Withers, Kayla Togneri, Braden Yang
 # Date:     	04/27/23
-
-# Syntax:       ./DWI_do_03_pull.sh [-h|--help] [-p|--postop] [-l|--list SUBJ_LIST] [SUBJ [SUBJ ...]]
-
-# Arguments:    SUBJ: subject ID
-# Description:  
 
 #====================================================================================================================
 
@@ -74,11 +67,13 @@ username=${USER}
 # biowulf login node paths
 biowulf_dwi_dir="/data/${username}/DWI"
 
-#--------------------------------------------------------------------------------------------------------------------
+dwi_proc_dir=$(pwd)
+scripts_dir=${dwi_proc_dir}/scripts
+#---------------------------------------------------------------------------------------------------------------------
 
 # REQUIREMENT CHECK
 
-source ${neu_dir}/Scripts_and_Parameters/scripts/all_req_check -ssh
+source "${scripts_dir}"/all_req_check.sh -ssh
 
 #====================================================================================================================
 # BEGIN SCRIPT
@@ -94,7 +89,7 @@ ssh-add
 all_wdir=($(ssh -q ${username}@biowulf.nih.gov "ls ${biowulf_dwi_dir} | xargs printf '%s\n' | grep __WORK_TORTOISE"))
 
 if [[ ${#all_wdir[@]} -eq 0 ]]; then
-	echo -e "\033[0;36m++ No working directories found in biowulf. Please run DWI_do_03_push.sh. Exiting... ++\033[0m"
+	echo -e "\033[0;36m++ No working directories found in biowulf. Please run DWI_do_03a_pushTORTOISE.sh. Exiting... ++\033[0m"
 	exit 1
 fi
 
@@ -105,10 +100,10 @@ for wdir_name in "${all_wdir[@]}"; do
 	# find if preop or postop
 	if echo ${ls_postop} | grep -q "postop"; then
 		biowulf_wdir="${biowulf_dwi_dir}/${wdir_name}/postop"
-		folder_suffix='_postop'
+		folder_prefix='postop_'
 	else
 		biowulf_wdir="${biowulf_dwi_dir}/${wdir_name}/preop"
-		folder_suffix=''
+		folder_prefix=''
 	fi
 
 	echo -e "\033[0;35m++ Pulling data from ${wdir_name} ++\033[0m"
@@ -133,39 +128,39 @@ for wdir_name in "${all_wdir[@]}"; do
 		# ********************** DEFINE PATHS **********************
 
 		subj_dwi_dir=$neu_dir/Projects/DWI/$subj
-		dwi_drbuddi_dir=${subj_dwi_dir}/drbuddi${folder_suffix}
+		drbuddi_dir=${subj_dwi_dir}/${folder_prefix}drbuddi
 
 		# ********************** COPY FILES FROM BIOWULF TO SHARES **********************
 
-		if [ -f "${dwi_drbuddi_dir}/buddi.nii" ] && [ -f "${dwi_drbuddi_dir}/buddi.bmtxt" ] && [ -f "${dwi_drbuddi_dir}/structural.nii" ]; then
+		if [ -f "${drbuddi_dir}/buddi.nii" ] && [ -f "${drbuddi_dir}/buddi.bmtxt" ] && [ -f "${drbuddi_dir}/structural.nii" ]; then
 			echo -e "\033[0;35m++ Data already copied from biowulf for subject $subj. Continuing... ++\033[0m"
 			continue
 		else
-			scp -r ${username}@helix.nih.gov:${biowulf_wdir}/${subj}/drbuddi${folder_suffix} ${subj_dwi_dir}/.
-			scp -r ${username}@helix.nih.gov:${biowulf_wdir}/${subj}/diffprep${folder_suffix} ${subj_dwi_dir}/diffprep${folder_suffix}_postproc
+			scp -r ${username}@helix.nih.gov:${biowulf_wdir}/${subj}/${folder_prefix}drbuddi ${subj_dwi_dir}/.
+			scp -r ${username}@helix.nih.gov:${biowulf_wdir}/${subj}/${folder_prefix}diffprep ${subj_dwi_dir}/${folder_prefix}diffprep_postproc
 		fi
 
 		# ********************** MOVE STDOUT FILES **********************
 
-		# get all (remaining) *.o (biowulf command) files from temp_stdout_dir
+		# get .e and .o files from temp_stdout_dir
 		all_o=$(find ${temp_stdout_dir} -mindepth 1 -maxdepth 1 -name "*.o" -type f)
 
 		# iterate over .o files
 		for o_file in "${all_o[@]}"; do
 			# grep for subject code (include space to distinguish between similar subjects, ex. p1 and p12)
-			if cat ${o_file} | grep -q "${subj} "; then
+			subj_check=$(grep " ${subj} " "$o_file")
+			if [[ $subj_check != '' ]]; then
 				# get corresponding .e (stdout) file
 				e_file="${o_file%.o}.e"
 
 				# move both files to subject's own directory
-				mv ${o_file} ${e_file} ${dwi_drbuddi_dir}
+				mv ${o_file} ${e_file} ${drbuddi_dir}
 
-				# break from current loop
 				break
 			fi
 		done
 
-		echo -e "\033[0;32m++ Successfully pulled DRBUDDI data for subject ${subj} ++\033[0m"
+		echo -e "\033[0;32m++ Successfully pulled diffprep_postproc and drbuddi data for subject ${subj} ++\033[0m"
 	done
 
 	# append all subjects from current wdir to the global list

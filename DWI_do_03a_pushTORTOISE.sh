@@ -2,15 +2,8 @@
 
 #====================================================================================================================
 
-# Name: 		DWI_do_03_push.sh
-
 # Author:   	Price Withers, Kayla Togneri, Braden Yang
 # Date:     	04/27/23
-
-# Syntax:       ./DWI_do_03_push.sh [-h|--help] [-p|--postop] [-l|--list SUBJ_LIST] [SUBJ [SUBJ ...]]
-
-# Arguments:    SUBJ: subject ID
-# Description:  
 
 #====================================================================================================================
 
@@ -68,9 +61,9 @@ case "${unameOut}" in
 esac
 
 if [[ $postop == 'true' ]]; then
-	folder_suffix='_postop'
+	folder_prefix='postop_'
 else
-	folder_suffix=''
+	folder_prefix=''
 fi
 
 pwd=$(pwd)
@@ -86,11 +79,13 @@ TORTOISE_version="TORTOISE/3.1.4"
 # biowulf login node paths
 biowulf_dwi_dir="/data/${username}/DWI"
 
+dwi_proc_dir=$(pwd)
+scripts_dir=${dwi_proc_dir}/scripts
 #---------------------------------------------------------------------------------------------------------------------
 
 # REQUIREMENT CHECK
 
-source ${neu_dir}/Scripts_and_Parameters/scripts/all_req_check -ssh
+source "${scripts_dir}"/all_req_check.sh -ssh
 
 #---------------------------------------------------------------------------------------------------------------------
 
@@ -155,24 +150,24 @@ for subj in "${subj_arr[@]}"; do
 	# *********************** DEFINE PATHS ***********************
 
     subj_dwi_dir=$neu_dir/Projects/DWI/$subj
-    dwi_reg_dir=$subj_dwi_dir/reg${folder_suffix}
-    dwi_sel_dir=$subj_dwi_dir/sel${folder_suffix}
+    reg_dir=$subj_dwi_dir/${folder_prefix}reg
+    sel_dir=$subj_dwi_dir/${folder_prefix}sel
 
     # create temporary diffprep folder
-	dwi_diffprep_dir=${subj_dwi_dir}/diffprep${folder_suffix}
-	if [[ ! -d "$dwi_diffprep_dir" ]]; then
-		mkdir "$dwi_diffprep_dir"
-		3dcopy "$dwi_reg_dir"/t2.nii "$dwi_diffprep_dir"/t2.nii
+	diffprep_dir=${subj_dwi_dir}/${folder_prefix}diffprep
+	if [[ ! -d "$diffprep_dir" ]]; then
+		mkdir "$diffprep_dir"
+		3dcopy "$reg_dir"/t2.nii "$diffprep_dir"/t2.nii
 		for dir in up down; do
 			prefix=dwi_${dir}_filtered
 			for file in ${prefix}_bval.dat ${prefix}_rvec.dat; do
-				cp "$dwi_sel_dir"/"$file" "$dwi_diffprep_dir"
+				cp "$sel_dir"/"$file" "$diffprep_dir"
 			done
-			3dcopy "$dwi_sel_dir"/${prefix}.nii.gz "$dwi_diffprep_dir"/${prefix}.nii.gz
+			3dcopy "$sel_dir"/${prefix}.nii.gz "$diffprep_dir"/${prefix}.nii.gz
 		done
 	fi
 
-	dwi_drbuddi_dir=${subj_dwi_dir}/drbuddi${folder_suffix}
+	drbuddi_dir=${subj_dwi_dir}/${folder_prefix}drbuddi
 
 	# *********************** SUBJECT SPECIFIC DATA CHECK ***********************
 
@@ -186,15 +181,15 @@ for subj in "${subj_arr[@]}"; do
 	fi
 
 	# check to see if subj is currently being/has been processed in biowulf
-	if [ -f "${subj_dwi_dir}/biowulf_proc" ]; then 
-		current_info=$(cat "${subj_dwi_dir}"/biowulf_proc)
+	if [ -f "${subj_dwi_dir}/${folder_prefix}biowulf_proc" ]; then 
+		current_info=$(cat "${subj_dwi_dir}"/${folder_prefix}biowulf_proc)
 		echo -e "\033[0;36m++ Subject ${subj} is currently being/has been processed in biowulf: ${current_info} ++\n++ Skipping subject ${subj} ++\033[0m"
 		subj_skip+=("${subj}")
 		continue
 	fi
 
 	# check for existence of drbuddi folder
-	if [ -d "${dwi_drbuddi_dir}" ]; then
+	if [ -d "${drbuddi_dir}" ]; then
 		echo -e "\033[0;36m++ Subject ${subj} already has a drbuddi folder. Skipping subject ${subj} ++\033[0m"
 		subj_skip+=("${subj}")
 		continue
@@ -209,7 +204,7 @@ for subj in "${subj_arr[@]}"; do
 
 	# copy subject data (diffprep dir) to __WORK_TORTOISE_??
 	echo -e "\033[0;35m++ Copying diffprep directory to biowulf for subject $subj... ++\033[0m"
-	scp -r ${dwi_diffprep_dir} ${username}@helix.nih.gov:${biowulf_wdir}/${subj}
+	scp -r ${diffprep_dir} ${username}@helix.nih.gov:${biowulf_wdir}/${subj}
 
 	# add line in swarm file for subject
 	echo "bash ${biowulf_wdir}/_run_TORTOISE.sh ${subj} postop_${postop} ${biowulf_wdir}" >> ${swarm_file}
@@ -266,9 +261,9 @@ fi
 for subj in "${subj_actually_proc[@]}"; do
 	# path variables
 	if [[ ${slurm} == '' ]]; then
-		echo -e "$username $TORTOISE_version $run_date_clean jobid-MISSING $subj" > ${subj_dwi_dir}/biowulf_proc${folder_suffix}
+		echo -e "$username $TORTOISE_version $run_date_clean jobid-MISSING $subj" > "${subj_dwi_dir}"/${folder_prefix}biowulf_proc
 	else
-		echo -e "$username $TORTOISE_version $run_date_clean $jobid $subj" > ${subj_dwi_dir}/biowulf_proc${folder_suffix}
+		echo -e "$username $TORTOISE_version $run_date_clean $jobid $subj" > "${subj_dwi_dir}"/${folder_prefix}biowulf_proc
 	fi
 done
 
