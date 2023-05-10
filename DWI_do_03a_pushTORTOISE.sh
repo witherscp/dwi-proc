@@ -180,17 +180,17 @@ for subj in "${subj_arr[@]}"; do
 		continue
 	fi
 
-	# check to see if subj is currently being/has been processed in biowulf
+	# check to see if subj is currently being processed in biowulf
 	if [ -f "${subj_dwi_dir}/${folder_prefix}biowulf_proc" ]; then 
 		current_info=$(cat "${subj_dwi_dir}"/${folder_prefix}biowulf_proc)
-		echo -e "\033[0;36m++ Subject ${subj} is currently being/has been processed in biowulf: ${current_info} ++\n++ Skipping subject ${subj} ++\033[0m"
+		echo -e "\033[0;36m++ Subject ${subj} is currently being processed in biowulf: ${current_info} ++\n++ Skipping subject ${subj} ++\033[0m"
 		subj_skip+=("${subj}")
 		continue
 	fi
 
 	# check for existence of drbuddi folder
-	if [ -d "${drbuddi_dir}" ]; then
-		echo -e "\033[0;36m++ Subject ${subj} already has a drbuddi folder. Skipping subject ${subj} ++\033[0m"
+	if [[ -d "${drbuddi_dir}" ]] || [[ -d ${diffprep_dir}_postproc ]]; then
+		echo -e "\033[0;36m++ Subject ${subj} already has some/all of a previous run in diffprep_postproc and drbuddi folders. Skipping subject ${subj} ++\033[0m"
 		subj_skip+=("${subj}")
 		continue
 	fi

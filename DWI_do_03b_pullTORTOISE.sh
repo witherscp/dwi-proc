@@ -160,6 +160,8 @@ for wdir_name in "${all_wdir[@]}"; do
 			fi
 		done
 
+		rm -f "$subj_dwi_dir"/${folder_prefix}biowulf_proc
+
 		echo -e "\033[0;32m++ Successfully pulled diffprep_postproc and drbuddi data for subject ${subj} ++\033[0m"
 	done
 
