@@ -202,7 +202,7 @@ for wdir_name in "${all_wdir[@]}"; do
 			new_out+=("${idx_format}")
 
 			# get all (remaining) *.o (biowulf command) files from temp_stdout_dir
-			all_o=$(find ${temp_stdout_dir} -mindepth 1 -maxdepth 1 -name "*.o" -type f)
+			all_o=($(find ${temp_stdout_dir} -mindepth 1 -maxdepth 1 -name "*.o" -type f))
 
 			# find .o and .e file that corresponds with the current subject and ROI
 			for o_file in "${all_o[@]}"; do

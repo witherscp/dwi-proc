@@ -143,7 +143,7 @@ for wdir_name in "${all_wdir[@]}"; do
 		# ********************** MOVE STDOUT FILES **********************
 
 		# get .e and .o files from temp_stdout_dir
-		all_o=$(find ${temp_stdout_dir} -mindepth 1 -maxdepth 1 -name "*.o" -type f)
+		all_o=($(find ${temp_stdout_dir} -mindepth 1 -maxdepth 1 -name "*.o" -type f))
 
 		# iterate over .o files
 		for o_file in "${all_o[@]}"; do
