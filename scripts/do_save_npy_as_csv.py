@@ -18,7 +18,6 @@ from os import path
 import sys
 
 import numpy as np
-import pandas as pd
 
 #====================================================================================================================
 
@@ -78,18 +77,17 @@ def save_data_csv(data, stat_list, odir):
 # DEFINE VARIABLES
 
 # check OS
-eig_dir = ""
 if sys.platform == "darwin":
-    eig_dir = "/Volumes/Shares/NEU"
+    neu_dir = "/Volumes/Shares/NEU"
 elif sys.platform == "linux":
-    eig_dir = "/shares/NEU"
+    neu_dir = "/shares/NEU"
 else:
     print(f"++ Unrecognized OS '{sys.platform}'; please run on either Linux or Mac OS ++")
     sys.exit()
 
 # define paths
-projects_dir = path.join(eig_dir, "Projects")
-dti_subj_dir = path.join(projects_dir,f"DTI/{args.subj}")     # subject's DTI data dir
+projects_dir = path.join(neu_dir, "Projects")
+dti_subj_dir = path.join(projects_dir,f"DWI/{args.subj}")     # subject's DTI data dir
 track_dir    = path.join(dti_subj_dir,f"track/{args.mode}") # track dir in subject's DTI dir
 
 # get list of stats to save as individual CSVs
